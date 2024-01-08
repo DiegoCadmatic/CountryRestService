@@ -14,6 +14,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Implements the following REST API with spring-boot:
@@ -33,14 +35,15 @@ public class CountryController {
     private static final Logger LOGGER = LoggerFactory.getLogger(CountryController.class);
 
     @GetMapping({"", "/"})
-    public ResponseEntity<?> getCountries() {
+    public ResponseEntity<List<CountrySummary>> getCountries() {
         try {
             ResponseEntity<CountrySummary[]> responseEntity = restTemplate.getForEntity(
                     COUNTRIES_API_URL + "all?fields=name,alpha2Code",
                     CountrySummary[].class);
 
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                return ResponseEntity.ok(Arrays.asList(responseEntity.getBody()));
+                List<CountrySummary> countrySummaries = Arrays.asList(Objects.requireNonNull(responseEntity.getBody()));
+                return ResponseEntity.ok(countrySummaries);
             } else {
                 // Handle errors here, return an empty list
                 return ResponseEntity.status(responseEntity.getStatusCode()).body(Collections.emptyList());
@@ -48,12 +51,12 @@ public class CountryController {
         } catch (RestClientException ex) {
             LOGGER.error("Error occurred while fetching countries: {}", ex.getMessage());
             // Handle RestClientException, return a suitable response
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while fetching countries.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
         }
     }
 
     @GetMapping({"/{name}", "/{name}/"})
-    public ResponseEntity<?> getCountryDetails(@PathVariable String name) {
+    public ResponseEntity<CountryDetails> getCountryDetails(@PathVariable String name) {
         try {
             ResponseEntity<CountryDetails[]> responseEntity = restTemplate.getForEntity(
                     COUNTRIES_API_URL + "name/" + name + "?fields=name,alpha2Code,capital,population,flag",
@@ -71,7 +74,7 @@ public class CountryController {
         } catch (RestClientException ex) {
             LOGGER.error("Error occurred while fetching country details for {}: {}", name, ex.getMessage());
             // Handle RestClientException, log the error or return a suitable response
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while fetching country details.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 }

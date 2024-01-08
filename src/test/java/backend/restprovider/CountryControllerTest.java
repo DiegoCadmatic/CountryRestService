@@ -105,6 +105,6 @@ public class CountryControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/countries/AnyCountry")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isInternalServerError())
-                .andExpect(MockMvcResultMatchers.content().string("An error occurred while fetching country details."));
+                .andExpect(MockMvcResultMatchers.content().string(""));
     }
 }
